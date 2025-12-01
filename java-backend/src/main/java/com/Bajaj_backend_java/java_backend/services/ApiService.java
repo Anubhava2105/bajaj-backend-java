@@ -36,19 +36,26 @@ public class ApiService {
     }
 
     public String submitSolution(String webhookUrl, String accessToken, String query) {
-        System.out.println("3. Submitting to: " + webhookUrl);
+        // Enforce the URL from Step 4 instructions
+        String targetUrl = baseUrl + "/testWebhook/JAVA";
+        System.out.println("3. Submitting to: " + targetUrl);
+
+        // DEBUG: Check if token is present
+        if (accessToken == null || accessToken.isEmpty()) {
+            System.err.println("CRITICAL ERROR: Access Token is NULL or Empty!");
+        } else {
+            System.out.println("   Token Length: " + accessToken.length());
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("Authorization", "Bearer " + accessToken);
+        headers.set("Authorization", accessToken);
 
-        // FIX: Using Constructor here
         SubmissionRequest body = new SubmissionRequest(query);
-
         HttpEntity<SubmissionRequest> entity = new HttpEntity<>(body, headers);
 
         return executeWithRetry(() ->
-                restTemplate.postForObject(webhookUrl, entity, String.class)
+                restTemplate.postForObject(targetUrl, entity, String.class)
         );
     }
 
