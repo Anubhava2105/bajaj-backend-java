@@ -14,23 +14,30 @@ public class StartupRunner implements CommandLineRunner {
     private final ApiService apiService;
     private final SqlSolverService sqlService;
 
-    @Value("${user.name}") private String name;
-    @Value("${user.reg-no}") private String regNo;
-    @Value("${user.email}") private String email;
+    private final String name;
+    private final String regNo;
+    private final String email;
 
-    public StartupRunner(ApiService apiService, SqlSolverService sqlService) {
+    // Use constructor injection for everything to fix "field never assigned" warnings
+    public StartupRunner(ApiService apiService,
+                         SqlSolverService sqlService,
+                         @Value("${user.name}") String name,
+                         @Value("${user.reg-no}") String regNo,
+                         @Value("${user.email}") String email) {
         this.apiService = apiService;
         this.sqlService = sqlService;
+        this.name = name;
+        this.regNo = regNo;
+        this.email = email;
     }
 
     @Override
     public void run(String... args) {
         try {
-            System.out.println("--- Starting Webhook Solver (MVC) ---");
+            System.out.println("--- Starting Webhook Solver (No Lombok) ---");
 
-            // 1. Generate Webhook
-            WebhookRequest webhookReq = WebhookRequest.builder()
-                    .name(name).regNo(regNo).email(email).build();
+            // FIX: Using standard Constructor instead of .builder()
+            WebhookRequest webhookReq = new WebhookRequest(name, regNo, email);
 
             WebhookResponse response = apiService.generateWebhook(webhookReq);
 
@@ -47,7 +54,6 @@ public class StartupRunner implements CommandLineRunner {
             }
 
             System.out.println("--- Finished ---");
-
         } catch (Exception e) {
             e.printStackTrace();
         }

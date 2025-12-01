@@ -42,7 +42,9 @@ public class ApiService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("Authorization", "Bearer " + accessToken);
 
-        SubmissionRequest body = SubmissionRequest.builder().finalQuery(query).build();
+        // FIX: Using Constructor here
+        SubmissionRequest body = new SubmissionRequest(query);
+
         HttpEntity<SubmissionRequest> entity = new HttpEntity<>(body, headers);
 
         return executeWithRetry(() ->
@@ -50,7 +52,6 @@ public class ApiService {
         );
     }
 
-    // Simple synchronous retry helper
     private <T> T executeWithRetry(java.util.function.Supplier<T> action) {
         int attempts = 0;
         while (attempts < MAX_RETRIES) {
@@ -63,7 +64,7 @@ public class ApiService {
                     throw new RuntimeException("API call failed after " + MAX_RETRIES + " attempts", e);
                 }
                 try {
-                    Thread.sleep(1000 * attempts); // Simple backoff
+                    Thread.sleep(1000 * attempts);
                 } catch (InterruptedException ie) {
                     Thread.currentThread().interrupt();
                     throw new RuntimeException("Interrupted during retry backoff", ie);
